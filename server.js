@@ -1,9 +1,9 @@
 const createError = require('http-errors');
 const express = require('express');
-const path = require('path');
+// const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const indexRouter = require('./router.js');
+const Router = require('./src/router/index');
  
 const app = express();
  
@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({
  
 app.use(cors());
  
-app.use('', indexRouter);
+app.use('/admin', Router);
  
 // Handling Errors
 app.use((err, req, res, next) => {
@@ -30,3 +30,5 @@ app.use((err, req, res, next) => {
 });
  
 app.listen(3000,() => console.log('Server is running on port 3000'));
+
+  // "main": "app.js",
