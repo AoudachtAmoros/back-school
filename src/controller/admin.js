@@ -50,7 +50,7 @@ async function login(req, res) {
                 return res.status(401).send( {status:401,error: 'Email or password is incorrect 1 !'})
             }
             if (bResult) {
-                const token = jwt.sign({ id: result[0].id_admin }, 'the-super-strong-secrect', { expiresIn: '1h' });
+                const token = jwt.sign({ id: result[0].id_admin }, 'the-super-strong-secrect', { expiresIn: '60h' });
                 //db.query(`UPDATE admin SET last_login = now() WHERE id_admin = '${result[0].id}'`);
                 return res.status(200).send( {status:200, msg: 'Logged in!', token:token, user: result[0] })
             }

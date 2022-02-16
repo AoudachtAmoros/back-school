@@ -3,7 +3,8 @@ const express = require('express');
 // const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const Router = require('./src/router/index');
+const adminRouter = require('./src/router/admin');
+const authRouter = require('./src/router/auth');
  
 const app = express();
  
@@ -17,7 +18,8 @@ app.use(bodyParser.urlencoded({
  
 app.use(cors());
  
-app.use('/admin', Router);
+app.use('/', authRouter);
+app.use('/admin',  adminRouter);
  
 // Handling Errors
 app.use((err, req, res, next) => {
