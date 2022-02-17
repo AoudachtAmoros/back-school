@@ -1,12 +1,12 @@
 const db = require('../configuration/dbConnection')
-const { signupValidation, loginValidation } = require('../../validation');
+// const { signupValidation, loginValidation } = require('../../validation');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { NotBeforeError } = require('jsonwebtoken');
 
 async function register(req, res, next) {
-    db.query(`SELECT * FROM admin WHERE LOWER(email) = LOWER(${db.escape(req.body.email)});`,
+    db.query(`SELECT * FROM admins WHERE LOWER(email) = LOWER(${db.escape(req.body.email)});`,
         (err, result) => {
             if(err){
                 return {status:false,error:err}
@@ -35,7 +35,7 @@ async function register(req, res, next) {
 };
 
 async function login(req, res) {
-    db.query(`SELECT * FROM admin WHERE email = ${db.escape(req.body.email)};`, (err, result) => {
+    db.query(`SELECT * FROM admins WHERE email = ${db.escape(req.body.email)};`, (err, result) => {
         // user does not exists
         if (err) {
              return res.status(500).send( {status:500,error:err})
@@ -68,7 +68,7 @@ async function getUser(req, res, next) {
     const theToken = req.headers.authorization.split(' ')[1];
     const decoded = jwt.verify(theToken, 'the-super-strong-secrect');
     console.log("token and id added")
-    db.query('SELECT * FROM admin WHERE id_admin=?' ,decoded.id, function (error, results, fields) {
+    db.query('SELECT * FROM admins WHERE id_admin=?' ,decoded.id, function (error, results, fields) {
         if (error) throw error;
         console.log(results)
         return res.send({ error: false, data: results[0], message: 'Fetch Successfully.' });

@@ -1,10 +1,13 @@
 const createError = require('http-errors');
+const http = require('http').createServer();
 const express = require('express');
 // const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const adminRouter = require('./src/router/admin');
 const authRouter = require('./src/router/auth');
+const parentRouter = require('./src/router/parent');
+const sockets = require('./src/configuration/sockets');
  
 const app = express();
  
@@ -19,6 +22,7 @@ app.use(bodyParser.urlencoded({
 app.use(cors());
  
 app.use('/', authRouter);
+app.use('/', parentRouter);
 app.use('/admin',  adminRouter);
  
 // Handling Errors
@@ -31,6 +35,9 @@ app.use((err, req, res, next) => {
     });
 });
  
+http.listen(7000,()=>{
+  console.log('Http is running on port : ',7000);
+  sockets.start(http)
+})
 app.listen(3000,() => console.log('Server is running on port 3000'));
 
-  // "main": "app.js",
