@@ -1,5 +1,6 @@
 const db = require('../configuration/dbConnection')
 const util = require('util');
+const { arch } = require('os');
 const query = util.promisify(db.query).bind(db);
 
 // All parents
@@ -112,11 +113,11 @@ async function getParents(req, res, next) {
           } else {
               if (data.length > 0) {
                 return res.status(404).json({
-                    message : 'Parent already exists'
+                    message : 'Already exists'
                 })
               } else {
                     var data = [req.body.id_parent, req.body.nom, req.body.prenom, req.body.tel, req.body.adresse, req.body.cin, req.body.image]
-                    var insertParent = "INSERT INTO parent(id_parent, nom, prenom, tel, adresse, cin, image) values (?, ?, ?, ?, ?, ?, ?)"
+                    var insertParent = "INSERT INTO parents(id_parent, nom, prenom, tel, adresse, cin, image) values (?, ?, ?, ?, ?, ?, ?)"
                     db.query(insertParent, data, (error, result) => {
                         if (error) {
                             return res.status(404).json({
@@ -166,18 +167,112 @@ async function getParents(req, res, next) {
   async function  getStudents(id) {
     console.log(id);
     try {
-      const rows = await query(`SELECT * FROM students WHERE id_fk_parent =${id}`);
+      const rows = await db.query(`SELECT * FROM students WHERE id_fk_parent =${id}`);
       return rows 
     } catch(error) {
       console.log(error);
       return error
     }
    }
+   
+//firstSCan
+  async function firstScan(data) {
+    try {
+      var getParent = `SELECT * FROM parents WHERE id_parent = ${data.RFID}`
+      let result = await query(getParent)
+      if (result.length>0) {
+        //updateState 
+        var updateS= 'UPDATE parents SET scan_state="waiting"';
+        db.query(updateS,  async(error, res) => {
+          if (error) {
+            console.log("State update error",error);
+            return  {
+              status :500,
+              error : error
+            }
+          }
+          else {
+                console.log("The state has been updated successfully");
+                let response = result[0]
+                console.log('----------',response);
+                let students =  await getStudents(response.id_parent)
+                response.students = students
+                
+                return  {
+                  status :200,
+                  data : response
+                }
+          }
+       })
+       }
+      else{
+          return  {
+            status :404,
+            error : 'no such parent with this id',
+          }
+        }
+    }
+     catch (error) {
+      console.log(error);
+      return   {
+        status :500,
+        error : error,
+      }
+    }
+    }
+
+    //secondScan
+async function secondScan(data) {
+  try {
+    var getParent = `SELECT * FROM parents WHERE id_parent = ${data.RFID}`
+    let result = await query(getParent)
+    if (result.length>0) {
+      //updateState 
+      var updateS = `UPDATE parents SET scan_state="went" where id_parent = ${data.RFID}`;
+      db.query(updateS,  async(error, result) => {
+        if (error) {
+          console.log("State update error",error);
+            return  {
+              status :500,
+              error : error
+            }
+        }
+        else {
+          console.log("The state has been updated successfully");
+          let response = result[0]
+          let students =  await getStudents(response.id_parent)
+          response.students = students
+          return  {
+            status :200,
+            data : response
+          }
+        }
+      })
+       
+    }else{
+        return  {
+          status :404,
+          error : 'no such parent with this id',
+          error : 1
+        }
+      }
+  }
+   catch (error) {
+    console.log(error);
+    return   {
+      status :500,
+      error : error,
+      error : 1
+    }
+  }
+  }
+  
   module.exports = {
       getParents : getParents,
       getParent : getParent,
       sGetParent : sGetParent,
       addParent : addParent,
-      deleteParent : deleteParent
-  
+      deleteParent : deleteParent,
+      firstScan :  firstScan,
+      secondScan:secondScan,
   }
