@@ -9,6 +9,7 @@ const authRouter = require('./src/router/auth');
 const parentRouter = require('./src/router/parent');
 const sockets = require('./src/configuration/sockets');
  
+ 
 const app = express();
  
 app.use(express.json());

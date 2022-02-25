@@ -21,7 +21,7 @@ async function register(req, res, next) {
                         return res.status(500).send({ msg: err });
                     } else {
                         // has hashed pw => add to database
-                        db.query(`INSERT INTO admin (nom, email, mot_de_passe) VALUES ('${req.body.name}', ${db.escape(req.body.email)}, ${db.escape(hash)})`,
+                        db.query(`INSERT INTO admin (nom, email, password) VALUES ('${req.body.name}', ${db.escape(req.body.email)}, ${db.escape(hash)})`,
                             (err, result) => {
                                 if (err) {
                                     throw err;
@@ -44,7 +44,7 @@ async function login(req, res) {
              return res.status(401).send( {status:401,error: 'Email or password is incorrect 1 !'})
         }
         // check password
-        bcrypt.compare(req.body.password, result[0]['mot_de_passe'], (bErr, bResult) => {
+        bcrypt.compare(req.body.password, result[0]['password'], (bErr, bResult) => {
             // wrong password
             if (bErr) {
                 return res.status(401).send( {status:401,error: 'Email or password is incorrect 1 !'})
