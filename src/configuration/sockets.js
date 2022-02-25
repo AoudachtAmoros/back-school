@@ -1,13 +1,15 @@
-const sockets = require('../Controller/sockets')
+//const sockets = require('../controller/sockets')
 const parentController = require('../controller/parent')
 
-var studentSocket = null
-var parentSocket = null
+var studentSocket = []
+var parentSocket = []
+var studentS;
+var parentS;
 
-module.exports.start =async function (http){
+module.exports.start = async function (http){ 
     console.log('start sockets');
 
-    const io = require('socket.io')(http,{
+    const io = require('socket.io')(http,{ 
         cors :{
             origin:'*'
         },
@@ -18,69 +20,129 @@ module.exports.start =async function (http){
     io.on('connection',(socket)=> {
         // console.log('new connection',socket.id);
         socket.on('parentArea',async()=>{
-            setID('parent',socket.id)
+            setSocketID('parent',socket.id)
             console.log('parentArea connection');
         })
         socket.on('studentArea',async()=>{
-            setID('student',socket.id)
+            setSocketID('student',socket.id)
             console.log('studentArea connection');
         })
-        // 
-        socket.on('parentEvent',async(data)=>{
-            console.log('studentSocket',studentSocket);
-            console.log('parentEvent data',data);
-            let response = await parentController.sGetParent(data) 
-            console.log('send parent event',);
-            socket.emit('parentEvent',response)
-            if (response.status==200) {
-                console.log('send student event',);
-                let id = getID('student')
-                io.to(id).emit("studentEvent", response);
+        //socket firstScan
+        socket.on('firstScan',async(data)=>{
+            console.log('first');
+            return
+            let response = await parentController.firstScan(data) 
+            console.log(response);
+            return
+            if (response.status==200){
+                addParent('parent',data);
             }
-        })
-        socket.on('studentDone',async()=>{
-            let id = getID('parent')
-            io.to(id).emit("parentDone");
-        })
-        socket.on("connect_error", () => {
-            // low-level connection
-            // connection is denied by the server in a middleware
-            console.log('connect_error ...',socket.id); 
-            // must reconnect after a given delay.
-        });
-        socket.on("reconnect_attempt", () => {
-            console.log('reconnection ...',socket.id); 
-            // ...
-        });
-        // 
-        socket.on("reconnect", () => {
-            console.log('reconnected',socket.id); 
-            // ...
-        });
-        // 
-        socket.on("disconnect",async () => {
-            // try {
-            //     let index = onlineUsers.findIndex(item => item.socketID==socket.id)
-            //     onlineUsers.splice(index,1)
-            //     console.log('disconnected');
-            // } catch (error) {
-            //     console.log(error);
-            // }
-        });
+
+            let psocket = getSocketID('parent')
+            let ssocket = getSocketID('student')
+            io.to(ssocket).emit('firstScan',response); 
+            io.to(psocket).emit('firstScan',response);
+            })
+             //socket secondScan    
+        socket.on('secondScan',async(data)=>{
+            console.log('second');
+         return
+                let response = await parentController.secondScan(data) 
+                if (response.status==200){
+                    let res = removeParent(data);
+                    response.res = res
+                }
+                let psocket = getSocketID('parent')
+                let ssocket = getSocketID('student')
+                io.to(ssocket).emit('secondScan',response); 
+                io.to(psocket).emit('secondScan',response);
+                console.log(response);
+                })
+                socket.on("connect_error", () => {
+                    // low-level connection
+                    // connection is denied by the server in a middleware
+                    console.log('connect_error ...',socket.id); 
+                    // must reconnect after a given delay.
+                });
+                socket.on("reconnect_attempt", () => {
+                    console.log('reconnection ...',socket.id); 
+                    // ...
+                });
+                // 
+                socket.on("reconnect", () => {
+                    console.log('reconnected',socket.id); 
+                    // ...
+                });
+                // 
+                socket.on("disconnect",async () => {
+                    // try {
+                    //     let index = onlineUsers.findIndex(item => item.socketID==socket.id)
+                    //     onlineUsers.splice(index,1)
+                    //     console.log('disconnected');
+                    // } catch (error) {
+                    //     console.log(error);
+                    // }
+                });
+     
     })
 }
-function setID(actor,id){
+ 
+function addParent(actor,data){
     switch(actor){
         case 'parent' :{
-            parentSocket = id
+            parentSocket.push(data)
             break
         }
         case 'student' :{
-            studentSocket = id
+            studentSocket.push(data)
             break
         }
     }
 }
+function removeParent(data){
+    let response = false
+    for(let i=0;i<parentSocket.length;i++){
+        if(data.RFID == parentSocket[i].RFID){
+            parentSocket.splice(i,1)
+            response = true 
+        }
+    }
+    return response
+}
+
+function setSocketID(actor,id){
+    switch(actor){
+        case 'parent' :{
+            parentS=id
+            break
+        }
+        case 'student' :{
+            studentS=id
+            break
+        }
+    }
+
+}
+function getSocketID(actor,id){
+    switch(actor){
+        case 'parent' :{
+            return parentS
+            break
+        }
+        case 'student' :{
+            return studentS
+            break
+        }
+    }
+
+}
+
+
+
+
+
+
+
 function getID(actor){
     switch(actor){
         case 'parent' :{

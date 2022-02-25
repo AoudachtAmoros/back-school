@@ -21,9 +21,9 @@ app.use(bodyParser.urlencoded({
  
 app.use(cors());
  
-app.use('/', authRouter);
-app.use('/', parentRouter);
-app.use('/admin',  adminRouter);
+//app.use('/', authRouter);
+//app.use('/', parentRouter);
+//app.use('/admin',  adminRouter);
  
 // Handling Errors
 app.use((err, req, res, next) => {
@@ -35,7 +35,7 @@ app.use((err, req, res, next) => {
     });
 });
  
-http.listen(7000,()=>{
+http.listen(7000,'192.168.1.54',()=>{
   console.log('Http is running on port : ',7000);
   sockets.start(http)
 })

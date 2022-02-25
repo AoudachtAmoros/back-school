@@ -8,6 +8,7 @@ const { NotBeforeError } = require('jsonwebtoken');
 async function register(req, res, next) {
     db.query(`SELECT * FROM admins WHERE LOWER(email) = LOWER(${db.escape(req.body.email)});`,
         (err, result) => {
+         
             if(err){
                 return {status:false,error:err}
             }
@@ -44,7 +45,7 @@ async function login(req, res) {
              return res.status(401).send( {status:401,error: 'Email or password is incorrect 1 !'})
         }
         // check password
-        bcrypt.compare(req.body.password, result[0]['mot_de_passe'], (bErr, bResult) => {
+        bcrypt.compare(req.body.password, result[0]['password'], (bErr, bResult) => {
             // wrong password
             if (bErr) {
                 return res.status(401).send( {status:401,error: 'Email or password is incorrect 1 !'})
@@ -78,7 +79,7 @@ async function getUser(req, res, next) {
 async function getUserById(req, res) {
 
         var e_name,p_name,e_image,p_image,nb;
-        db.query('SELECT p.nom,p.prenom,p.image,e.e_nom,e.e_prenom,e.e_image FROM parent p INNER JOIN etudiant e WHERE id_parent = id_fk_parent AND id_parent = ?', [req.params.id], (err, results) => {
+        db.query('SELECT p.last_name,p.prenom,p.image,e.e_nom,e.e_prenom,e.e_image FROM parent p INNER JOIN etudiant e WHERE id_parent = id_fk_parent AND id_parent = ?', [req.params.id], (err, results) => {
             if(err) return err;
             nb = results.length;
             students = []
