@@ -35,8 +35,8 @@ app.use((err, req, res, next) => {
       message: err.message,
     });
 });
- 
-http.listen(7000,'192.168.1.54',()=>{
+// '192.168.1.54',
+http.listen(7000,()=>{
   console.log('Http is running on port : ',7000);
   sockets.start(http)
 })

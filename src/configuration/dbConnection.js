@@ -2,8 +2,8 @@ var mysql = require('mysql');
 var conn = mysql.createConnection({
   host: 'localhost', // Replace with your host name
   user: 'root',      // Replace with your database username
-  password: 'Password@123',      // Replace with your database password
-  database: 'schooldb' // // Replace with your database Name
+  password: '',      // Replace with your database password
+  database: 'school' // // Replace with your database Name
 }); 
  
 conn.connect(function(err) {

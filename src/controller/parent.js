@@ -165,9 +165,8 @@ async function getParents(req, res, next) {
   }
  
   async function  getStudents(id) {
-    console.log(id);
     try {
-      const rows = await db.query(`SELECT * FROM students WHERE id_fk_parent =${id}`);
+      const rows = await query(`SELECT * FROM students WHERE id_fk_parent =${id}`);
       return rows 
     } catch(error) {
       console.log(error);
@@ -175,96 +174,64 @@ async function getParents(req, res, next) {
     }
    }
    
-//firstSCan
+  //firstSCan
   async function firstScan(data) {
-    try {
-      var getParent = `SELECT * FROM parents WHERE id_parent = ${data.RFID}`
-      let result = await query(getParent)
-      if (result.length>0) {
-        //updateState 
-        var updateS= 'UPDATE parents SET scan_state="waiting"';
-        db.query(updateS,  async(error, res) => {
-          if (error) {
-            console.log("State update error",error);
-            return  {
-              status :500,
-              error : error
-            }
-          }
-          else {
+        try {
+          var getParent = `SELECT * FROM parents WHERE id_parent = ${data.RFID}`
+          let rowDataPacket = await query(getParent)
+          if (rowDataPacket.length>0) {
+                let parent = rowDataPacket[0]
+                let updateState= `UPDATE parents SET scan_state="first_scan" WHERE  id_parent=${parent.id_parent}`;
+                let updateQuery = await query(updateState)
                 console.log("The state has been updated successfully");
-                let response = result[0]
-                console.log('----------',response);
-                let students =  await getStudents(response.id_parent)
-                response.students = students
-                
+                let students =  await getStudents(parent.id_parent)
+                parent.students = students
                 return  {
                   status :200,
-                  data : response
+                  data : parent
                 }
-          }
-       })
-       }
-      else{
-          return  {
-            status :404,
-            error : 'no such parent with this id',
+          }else{
+              return  {
+                status :404,
+                error : 'no such parent with this id',
+              }
+            }
+        }catch (error) {
+          console.log(error);
+          return   {
+            status :500,
+            error : error,
           }
         }
-    }
-     catch (error) {
-      console.log(error);
-      return   {
-        status :500,
-        error : error,
-      }
-    }
     }
 
     //secondScan
 async function secondScan(data) {
-  try {
-    var getParent = `SELECT * FROM parents WHERE id_parent = ${data.RFID}`
-    let result = await query(getParent)
-    if (result.length>0) {
-      //updateState 
-      var updateS = `UPDATE parents SET scan_state="went" where id_parent = ${data.RFID}`;
-      db.query(updateS,  async(error, result) => {
-        if (error) {
-          console.log("State update error",error);
-            return  {
-              status :500,
-              error : error
-            }
-        }
-        else {
-          console.log("The state has been updated successfully");
-          let response = result[0]
-          let students =  await getStudents(response.id_parent)
-          response.students = students
-          return  {
-            status :200,
-            data : response
+      try {
+          var getParent = `SELECT * FROM parents WHERE id_parent = ${data.RFID}`
+          let rowDataPacket = await query(getParent)
+          if (rowDataPacket.length>0) {
+                let parent = rowDataPacket[0]
+                let updateState= `UPDATE parents SET scan_state="second_scan" WHERE  id_parent=${parent.id_parent}`;
+                let updateQuery = await query(updateState)
+                console.log("The state has been updated successfully");
+                return  {
+                  status :200,
+                  data : parent
+                }
+          }else{
+              return  {
+                status :404,
+                error : 'no such parent with this id',
+              }
           }
-        }
-      })
-       
-    }else{
-        return  {
-          status :404,
-          error : 'no such parent with this id',
-          error : 1
-        }
+      }catch (error) {
+        console.log(error);
+            return   {
+              status :500,
+              error : error,
+            }
       }
-  }
-   catch (error) {
-    console.log(error);
-    return   {
-      status :500,
-      error : error,
-      error : 1
-    }
-  }
   }
   
   module.exports = {
