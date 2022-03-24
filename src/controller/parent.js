@@ -3,7 +3,7 @@ const util = require('util');
 const { arch } = require('os');
 const query = util.promisify(db.query).bind(db);
 
-// All parents
+// All parent
 async function getParents(req, res, next) {
     var getParents = "SELECT * FROM parents"
     db.query(getParents,  async(error, result) => {
@@ -30,7 +30,7 @@ async function getParents(req, res, next) {
         })
   }
   // 
-  //Parents by ID
+  //Parents by id
   async function getParent(req, res, next) {
     console.log(req.body); 
     var getParent = `SELECT * FROM parents WHERE id_parent = ${req.body.RFID}`
