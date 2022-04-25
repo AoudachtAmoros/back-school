@@ -36,7 +36,7 @@ app.use((err, req, res, next) => {
     });
 });
 // '192.168.1.54',
-http.listen(7000,()=>{
+http.listen(7000,'0.0.0.0',()=>{
   console.log('Http is running on port : ',7000);
   sockets.start(http)
 })
